@@ -34,7 +34,6 @@ data：实验所需数据
 - 功能二：基于因果关系拟合因果方程；
 - 功能三：基于干预的反事实数据增强。
 
-![aaaaa](https://github.com/user-attachments/assets/631a9751-dad3-4065-8368-40e99cd89f53)
 
 ## 许可证
 本项目采用 MIT 许可证。详细信息请参阅 [LICENSE](LICENSE) 文件。
