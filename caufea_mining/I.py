@@ -53,7 +53,7 @@ os.makedirs(output_csv_path, exist_ok=True)
 output_file_path = os.path.join(output_csv_path, 'top_10_features_and_labels.csv')
 selected_data.to_csv(output_file_path, index=False, header=True)
 print(f'Top 8 features and labels data saved to {output_file_path}')
-#8列特征分别是：【从1开始计数】特征21、9、18、1、11、14、4、5、2、7、8
+#此处选择了10个特征
 
 #10、将feature_mi_dict可视化为柱状图
 # plt.figure(figsize=(10, 6))

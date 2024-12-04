@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np
 
 # 读取数据集
-dataset = pd.read_csv("D:/A项目文件夹/imitationProject/data/test_data1.csv")
+dataset = pd.read_csv("D:/A项目文件夹/imitationProject/CGIL/data/data_process66.csv")
 
 # 提取前22列的数据
 data_columns = dataset.columns[:-1]
@@ -23,9 +23,10 @@ data_exp = np.exp(data)
 transformed_dataset = pd.concat([data_exp, dataset.iloc[:, -1]], axis=1)
 
 # 保存处理后的数据集为新的CSV文件
-transformed_dataset.to_csv("transformed_dataset.csv", index=False)
+transformed_dataset.to_csv("exp_transformed_dataset.csv", index=False)
 
 
 num_rows, num_columns = transformed_dataset.shape
 print(f"Number of rows: {num_rows}")
 print(f"Number of columns: {num_columns}")
+

@@ -11,10 +11,11 @@
 # （0）此处用的是保留下来的因果数据集
 # （1）建立神经网络NN，用causal.csv数据集对NN进行训练，用于拟合因果特征下的函数关系，NN的输出为label的预测值label_pre，可视化损失函数曲线和准确率曲线，使得网络训练良好，训练完成的模型称为model；
 # （2）令Uf=Lable-model，model的输出是label的预测值label_pre1，Label指的是数据集中的最后一列label,此处用每一条记录计算得到Uf，并对Uf进行保存。
-# （4）对causal.csv数据集中的第n列中的数值删除，并用生成的随机数填充，随机数不为负数，其他列数值不变，形成不含label的新数据集new_causal.csv。
+# （4）对causal.csv数据集中的第n列中的数值删除，指定数据进行干预，其他列数值不变，形成不含label的新数据集new_causal.csv。(干预的部分需要指定数据值)
 # （5）将新数据集new_causal.csv中的每一行输入model中，得到label_pre2，令label_pre3=label_pre2+Uf，输出label_pre3的值，label_pre3的值要四舍五入保存成整数
 # （6）将新数据集new_causal.csv和label_pre3对应合并起来，保存到AUG_dataset.csv文件中。
-# （7）将AUG_dataset.csv文件的23列数据保持不变，在最前面插入2列，数值用随机数填充，将新的数据集文件共25列保存为AUG_upsample_dataset.csv
+# （7）将非因果数据进行G(0,0.05)的噪音加性干扰，与因果顺序数据合并，新的数据集23列
+
 
 #该部分的输出：MLP的训练损失图，前10项的Uf,干预后带label的数据集，干预后不带label的数据集，升维后的数据集。
 # 超参数：干预的列数
@@ -28,16 +29,15 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
 import matplotlib
-matplotlib.use('TkAgg')  # 以 'TkAgg' 为例；如有需要，尝试其他后端
+# matplotlib.use('TkAgg')  # 以 'TkAgg' 为例；如有需要，尝试其他后端
 import matplotlib.pyplot as plt
 from datetime import datetime
 import os
 
 
-
 # Step 1: Load and preprocess the data
-data = pd.read_csv('D:/A项目文件夹/imitationProject/CGIL/caufea_mining/top_10_features_and_labels.csv')
-print(f'原数据集 data 的行数和列数：{data.shape}')
+data = pd.read_csv('/home/tianlili/data0/CGIL/caufea_mining/newsorted_top_10_features_and_labels.csv')
+print(f'因果数据集 data 的行数和列数：{data.shape}')
 X = data.iloc[:, :-1].values
 y = data.iloc[:, -1].values.reshape(-1, 1)
 
@@ -69,7 +69,7 @@ class NeuralNetwork(nn.Module):
         return x
 
 # Step 3: Train the neural network
-def train_model_with_print(model, X_train, y_train, epochs=1000, lr=0.001, print_every=10):
+def train_model_with_print(model, X_train, y_train, epochs=1600, lr=0.001, print_every=10):
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
     losses = []
@@ -117,11 +117,10 @@ print(Uf[:10])
 print(f'Uf的行数和列数：{Uf.shape}')
 
 # Step 6: Generate new dataset and predict label_pre3
-
+# 此处为MLP和Uf都已经算出来的情况下，进行干预
 # n=0 #选取干预的列数 这里的索引是从0开始
 new_data_do = data.copy()  # 复制原始数据集以避免修改原始数据
 ##注意：离散的数据干预的时候只能取离散值，连续的数据干预的时候可以取连续值。
-
 
 ##连续
 # 生成在 [a, b) 范围内的随机数
@@ -130,14 +129,15 @@ new_data_do = data.copy()  # 复制原始数据集以避免修改原始数据
 # new_data_do.iloc[:, n] = a + (b - a) * np.random.rand(len(data))
 
 ##离散数据
-new_data_do.iloc[:,9]=1#选择new_data_do的第一列赋值为1。
+##此处需要调整：
+new_data_do.iloc[:,9]=1#选择new_data_do的第一列赋值为1。0开始索引，实际上是第10列。
 
 #new_data_do.iloc[:, n] = np.random.randn(len(data))  # 用生成的随机数替代第一列，[0,1)内均匀分布的随机数
-new_data_do.to_csv('new_causal_do.csv', index=False) #do干预后的新数据集；
+new_data_do.to_csv('/home/tianlili/data0/CGIL/counfac_aug/new_causal_do01.csv', index=False) #do干预后的新数据集；
 print(f'新数据集 new_causal_do 的行数和列数：{new_data_do.shape}')#（1910,23）
 
 new_data_do_X = data.iloc[:, :-1] #不包含label的新数据集
-new_data_do_X.to_csv('new_causal_do_X.csv', index=False)
+new_data_do_X.to_csv('/home/tianlili/data0/CGIL/counfac_aug/new_causal_do_X.csv', index=False)
 
 #使用已经训练好的模型对提取出的新数据进行预测，并将预测结果存储在label_pre2中。
 label_pre2 = model(torch.Tensor(new_data_do_X.values)).detach().numpy()
@@ -149,24 +149,18 @@ print(f'label_pre3的行数和列数：{label_pre3.shape}')
 # Step 7: Save the augmented dataset
 # 此部分是do后的数据+新的label，数据集合并
 AUG_dataset = pd.concat([new_data_do_X, pd.DataFrame(label_pre3, columns=['label_pre3'])], axis=1)
-AUG_dataset.to_csv('AUG_dataset.csv', index=False)
-print(f'数据集 AUG_dataset 的行数和列数：{AUG_dataset.shape}')
+AUG_dataset.to_csv('/home/tianlili/data0/CGIL/counfac_aug/output/AUG_causal_sequence_dataset_9_1.csv', index=False)
+print(f'数据集 AUG_causal_dataset 的行数和列数：{AUG_dataset.shape}')
 
 # Step 8: Create and save AUG_upsample_dataset
+# 非因果因素的顺序
 #升维,需要升几个维度
-D=12
-# AUG_upsample_dataset = pd.concat([pd.DataFrame(np.random.rand(len(AUG_dataset), 2)), AUG_dataset], axis=1)
-a = 0  # 范围的起始值
-b = 3  # 范围的终止值
-# [0,3)之间均匀分布的随机数
-AUG_upsample_dataset = pd.concat([pd.DataFrame((b - a) * np.random.rand(len(AUG_dataset), D) + a), AUG_dataset], axis=1)
-AUG_upsample_dataset.to_csv('AUG_upsample_dataset_9_1.csv', index=False)
-print(f'数据集 AUG_upsample_dataset_1 的行数和列数：{AUG_upsample_dataset.shape}')
 
-# timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-# output_csv_path = 'D:/A项目文件夹/imitationProject/data/'+ timestamp
-# #os.makedirs(output_csv_path, exist_ok=True)
-# # 拼接保存文件的路径
-# output_file_path = os.path.join(output_csv_path, 'AUG_upsample_dataset.csv')
-# AUG_upsample_dataset.to_csv(output_file_path, index=False, header=True)
-# print(f'AUG_upsample_dataset saved to {output_file_path}')
+# D=12
+# a = 0  # 范围的起始值
+# b = 3  # 范围的终止值
+# # [0,3)之间均匀分布的随机数
+# AUG_upsample_dataset = pd.concat([pd.DataFrame((b - a) * np.random.rand(len(AUG_dataset), D) + a), AUG_dataset], axis=1)
+# AUG_upsample_dataset.to_csv('AUG_upsample_dataset_9_1.csv', index=False)
+# print(f'数据集 AUG_upsample_dataset_1 的行数和列数：{AUG_upsample_dataset.shape}')
+

@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np
 
 # 读取数据集
-file_path = "D:/A项目文件夹/imitationProject/data/test_data1.csv"
+file_path = "D:/A项目文件夹/imitationProject/CGIL/data/data_process66.csv"
 df = pd.read_csv(file_path)
 
 # 提取前22列数据
