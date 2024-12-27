@@ -14,7 +14,14 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 # 读取测试数据集
-csv_path = "/home/tianlili/data0/CGIL/diff_distrib/Gauss_noisy_dataset_0.01_0.05.csv"
+# csv_path = "/home/tianlili/data0/CGIL/diff_distrib/Gauss_noisy_dataset_0_0.01.csv"
+# csv_path = "/home/tianlili/data0/CGIL/diff_distrib/Gauss_noisy_dataset_0.01_0.05.csv"
+# csv_path = "/home/tianlili/data0/CGIL/diff_distrib/uniform_noisy_dataset.csv"
+# csv_path = "/home/tianlili/data0/CGIL/diff_distrib/poisson_noisy_dataset.csv"
+# csv_path = "/home/tianlili/data0/CGIL/diff_distrib/sample_biased_dataset.csv"
+# csv_path = "/home/tianlili/data0/CGIL/diff_distrib/log_transformed_dataset.csv"
+csv_path = "/home/tianlili/data0/CGIL/diff_distrib/exp_transformed_dataset.csv"
+
 df = pd.read_csv(csv_path)
 X_test = torch.from_numpy(df.iloc[:, :-1].values).to(torch.float32)
 y_test = torch.from_numpy(df.iloc[:, -1].values - 1).to(torch.int64)#测试值的label减去1
@@ -56,7 +63,7 @@ output_size = torch.max(y_test) + 1
 model = ImitationModel(input_size, output_size)
 
 # 加载预训练模型的参数
-model.load_state_dict(torch.load("/home/tianlili/data0/CGIL/IL_model/logs2/BC_trained_0.6005.pt"))
+model.load_state_dict(torch.load("/home/tianlili/data0/CGIL/IL_model/logs2/BC_trained_20241213-211808.pt"))
 
 # 模型测试
 model.eval()
