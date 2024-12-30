@@ -1,4 +1,7 @@
+
+
 #实现从原数据集中抽取非因果数据列，并在非因果数据上加入加性噪音高斯(0,0.05)
+
 import pandas as pd
 import numpy as np
 #step 8：载入数据，抽取第几列，进行高斯噪音，高斯后的数据要与干预后的因果数据合并。
@@ -19,8 +22,8 @@ data_with_noise = data01 + noise
 # # 将数据四舍五入到四位小数
 # data_with_noise = np.round(data_with_noise, 4)
 # # 转换为 DataFrame 如果不是 pandas 格式
-
 # data_with_noise_df = pd.DataFrame(data_with_noise)
+
 # 保存增加噪音后的数据
 data_with_noise.to_csv('/home/tianlili/data0/CGIL/counfac_aug/output/noncausal_sequence_withnoise.csv', index=False,header=False,float_format='%.4f')
 print(f"noncausal_sequence_withnoise数据已保存:{data_with_noise.shape}")

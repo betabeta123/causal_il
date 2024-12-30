@@ -20,20 +20,28 @@ import matplotlib.pyplot as plt
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
 
+
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+# log_dir ="D:/A项目文件夹/imitationProject/CGIL/IL_model/logs/" + timestamp
+# writer = SummaryWriter(log_dir)
+
+# 读取CSV文件
 csv_file_path = '/home/tianlili/data0/CGIL/data/data_process66.csv'
 df = pd.read_csv(csv_file_path)
 
 # 划分训练集和测试集
-train_data, test_data = train_test_split(df, test_size=0.3, random_state=1)
+train_data, test_data = train_test_split(df, test_size=0.1, random_state=50)
 # 将测试数据集保存为CSV文件
 test_data.to_csv('/home/tianlili/data0/CGIL/data/test_data1.csv', index=False)#不保存行索引信息
 
-# 提取特征和标签
+# 提取特征和标签，这里的训练集和测试集
 X_train = torch.tensor(train_data.iloc[:, :-1].values, dtype=torch.float32)
 y_train = torch.tensor(train_data.iloc[:, -1].values - 1, dtype=torch.long)  # 标签从1开始，减1变为从0开始
+# y_train = torch.tensor(train_data.iloc[:, -1].values, dtype=torch.long)  # 标签从1开始，减1变为从0开始
+
 X_test = torch.tensor(test_data.iloc[:, :-1].values, dtype=torch.float32)
 y_test = torch.tensor(test_data.iloc[:, -1].values - 1, dtype=torch.long)
+# y_test = torch.tensor(test_data.iloc[:, -1].values, dtype=torch.long)
 
 # 定义模型
 class ImitationModel(nn.Module):
@@ -67,8 +75,8 @@ class ImitationModel(nn.Module):
         x = self.fc6(x)
         return x
 
-num_epochs = 2500
-lr=0.01
+num_epochs = 3000
+lr=0.0001
 # 初始化模型、损失函数和优化器
 input_size = X_train.shape[1]
 output_size = torch.max(y_train) + 1
@@ -77,22 +85,10 @@ print(model)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr)
 
-# 定义保存路径
-save_dir = "/home/tianlili/data0/CGIL/IL_model/logs1/parameter"
-if not os.path.exists(save_dir):
-    os.makedirs(save_dir)
-
-csv_save_path = os.path.join(save_dir, f"trainingBC_0.3_results2500_{timestamp}.csv")
-# model_save_path = os.path.join(save_dir, f'BC_trained_{timestamp}.pt')
-
-
 # 训练模型
 train_losses = []
 test_losses = []
 accuracies = []
-max_accuracy = 0
-max_accuracy_epoch = 0
-results = []  # 用于保存每个 epoch 的结果
 
 for epoch in range(num_epochs):
     model.train()
@@ -114,31 +110,15 @@ for epoch in range(num_epochs):
         accuracy = (predicted_labels == y_test).sum().item() / len(y_test)
         accuracies.append(accuracy)
 
-     # 保存当前 epoch 的数据
-    results.append({
-        "Epoch": epoch + 1,
-        "Train Loss": loss.item(),
-        "Test Loss": test_loss.item(),
-        "Accuracy": accuracy
-    })
-
     # 打印每个epoch的损失和准确率
     print(f'Epoch [{epoch+1}/{num_epochs}], '
           f'Train Loss: {loss.item():.4f}, '
           f'Test Loss: {test_loss.item():.4f}, '
           f'Accuracy: {accuracy:.4f}')
-    if accuracy > max_accuracy:
-        max_accuracy = accuracy
-        max_accuracy_epoch = epoch + 1
 
-# 保存结果到 CSV 文件
-pd.DataFrame(results).to_csv(csv_save_path, index=False)
-print(f"训练结果已保存到 CSV 文件: {csv_save_path}")
-
-save_dir = "/home/tianlili/data0/CGIL/IL_model/logs1"
+save_dir = "/home/tianlili/data0/CGIL/IL_model/logs"
 model_save_path=os.path.join(save_dir,f'BC_trained_{timestamp}.pt')
 print("Model will be saved at:", model_save_path)
-print(f"The maximum accuracy is {max_accuracy:.4f} which occurred at epoch {max_accuracy_epoch}.")
 torch.save(model.state_dict(), model_save_path)#将神经网络的参数保存到BC_trained.pt中
 
 # 可视化损失和准确率

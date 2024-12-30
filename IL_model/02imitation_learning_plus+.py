@@ -4,6 +4,7 @@
 # @FileName: 01imitation_learning_plus+.py
 # @Software: PyCharm
 
+
 #此代码用于模型训练和iid的测试
 #可以看到训练损失和测试损失，以及IID下的准确率，划分成了训练集与测试集
 import torch
@@ -21,14 +22,14 @@ from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
 
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-# csv_file_path = '/home/tianlili/data0/CGIL/counfac_aug/AUG_upsample_dataset_all.csv'
-csv_file_path = '/home/tianlili/data0/CGIL/counfac_aug/output/new_concat/new2_cancat_sequence_data.csv'
+csv_file_path = '/home/tianlili/data0/CGIL/counfac_aug/AUG_upsample_dataset_all.csv'
 df = pd.read_csv(csv_file_path)
 
 # 划分训练集和测试集
-train_data, test_data = train_test_split(df, test_size=0.3, random_state=1)
+train_data, test_data = train_test_split(df, test_size=0.1, random_state=1)
 # 将测试数据集保存为CSV文件
-test_data.to_csv('/home/tianlili/data0/CGIL/data/test_new2_cancat_sequence_data.csv', index=False)#不保存行索引信息
+test_data.to_csv('/home/tianlili/data0/CGIL/data/test_data2.csv', index=False)#不保存行索引信息
+
 
 # 提取特征和标签
 X_train = torch.tensor(train_data.iloc[:, :-1].values, dtype=torch.float32)
@@ -69,7 +70,7 @@ class ImitationModel(nn.Module):
         x = self.fc6(x)
         return x
 
-num_epochs = 2500
+num_epochs = 2000
 lr=0.01
 # 初始化模型、损失函数和优化器
 input_size = X_train.shape[1]
@@ -79,25 +80,12 @@ print(model)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr)
 
-# 定义保存路径
-save_dir = "/home/tianlili/data0/CGIL/IL_model/logs2/parameter"
-if not os.path.exists(save_dir):
-    os.makedirs(save_dir)
-
-csv_save_path = os.path.join(save_dir, f"trainingCGIL_0.3_results2500_{timestamp}.csv")
-# model_save_path = os.path.join(save_dir, f'BC_trained_{timestamp}.pt')
-
-
-
 # 训练模型
 train_losses = []
 test_losses = []
 accuracies = []
 max_accuracy = 0
 max_accuracy_epoch = 0
-results = [] 
-
-
 for epoch in range(num_epochs):
     model.train()
     optimizer.zero_grad()
@@ -118,14 +106,6 @@ for epoch in range(num_epochs):
         accuracy = (predicted_labels == y_test).sum().item() / len(y_test)
         accuracies.append(accuracy)
 
-     # 保存当前 epoch 的数据
-    results.append({
-        "Epoch": epoch + 1,
-        "Train Loss": loss.item(),
-        "Test Loss": test_loss.item(),
-        "Accuracy": accuracy
-    })
-
     # 打印每个epoch的损失和准确率
     print(f'Epoch [{epoch+1}/{num_epochs}], '
           f'Train Loss: {loss.item():.4f}, '
@@ -134,11 +114,6 @@ for epoch in range(num_epochs):
     if accuracy > max_accuracy:
         max_accuracy = accuracy
         max_accuracy_epoch = epoch + 1
-
-# 保存结果到 CSV 文件
-pd.DataFrame(results).to_csv(csv_save_path, index=False)
-print(f"训练结果已保存到 CSV 文件: {csv_save_path}")
-
 
 save_dir = "/home/tianlili/data0/CGIL/IL_model/logs2"
 model_save_path=os.path.join(save_dir,f'BC_trained_{timestamp}.pt')
