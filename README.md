@@ -2,7 +2,7 @@
 
 The aim of this project is to improve the out-of-distribution generalization performance of imitation learning, avoiding the accumulation of errors by the agent due to poor generalization performance when encountering unfamiliar scenarios.
 
-## 目录
+## Installation
 - [Installation](#Installation)
 - [User Guide](#User Guide)
 - [Feature Lists](#Feature Lists)
