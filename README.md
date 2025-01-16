@@ -3,12 +3,6 @@
 The aim of this project is to improve the out-of-distribution generalization performance of imitation learning, avoiding the accumulation of errors by the agent due to poor generalization performance when encountering unfamiliar scenarios.
 
 ## Installation
-- #Installation
-- #User Guide
-- #Feature Lists
-- [License](#License)
-- [Contact Information](#Contact Information)
-## Installation
 1. Clone this repository： 
    ```bash
    git clone https://github.com/betabeta123/causal_il.git
