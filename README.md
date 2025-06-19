@@ -1,4 +1,4 @@
-# Enhancing Out-of-Distribution Generalization in Imitation Learning via Intervention-Based Counterfactuals
+# A Counterfactual Intervention Framework for Out-of-Distribution Generalization in Imitation Learning
 
 The aim of this project is to improve the out-of-distribution generalization performance of imitation learning, avoiding the accumulation of errors by the agent due to poor generalization performance when encountering unfamiliar scenarios.
 
@@ -10,7 +10,7 @@ The aim of this project is to improve the out-of-distribution generalization per
 2.  Install dependencies
 ## User Guide
 
-caufea_mining：Includes causal discovery algorithms (PC and FCI algorithms) and the mutual information method.
+caufea_mining：Includes causal discovery algorithms (LiNGAM and FCI algorithms) and the mutual information method.
 
 diff_distrib：Simulated seven different data distributions.
 
